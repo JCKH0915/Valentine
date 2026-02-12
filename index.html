@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Valentine</title>
+<style>
+  :root{
+    --bg:#e9d9c7;         /* light brown background */
+    --text:#4a2f22;       /* dark brown text */
+    --btn:#e53935;        /* red button */
+    --btn-hover:#c62828;  /* darker red on hover */
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", sans-serif;
+  }
+  .center {
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .card{
+    text-align:center;
+    max-width:720px;
+  }
+  h1{
+    font-size: clamp(22px, 5vw, 36px);
+    margin: 0 0 24px;
+    line-height:1.25;
+    font-weight: 700;
+  }
+  .buttons{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  button{
+    appearance:none;
+    border:0;
+    background:var(--btn);
+    color:#fff;
+    padding:14px 22px;
+    border-radius:12px;
+    font-size: clamp(16px, 3.4vw, 20px);
+    font-weight:700;
+    cursor:pointer;
+    box-shadow: 0 6px 14px rgba(229,57,53,0.25);
+    transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+    user-select:none;
+  }
+  button:hover{ background:var(--btn-hover); transform: translateY(-1px); }
+  button:active{ transform: translateY(0); }
+  /* Special scaling behavior for the YES button */
+  #yesBtn{
+    transform-origin:center;
+  }
+
+  /* Photo view (appears after YES) */
+  .photo-view{
+    position:fixed;
+    inset:0;
+    display:none;                 /* becomes flex on YES */
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    padding:24px;
+  }
+  .photo-card{
+    text-align:center;
+    max-width: min(92vw, 820px);
+    margin:auto;
+  }
+  .love-title{
+    font-size: clamp(22px, 6vw, 42px);
+    font-weight: 800;
+    margin: 0 0 14px 0;
+    color: var(--text);
+  }
+  .photo-center{
+    display:block;
+    width:auto;
+    height:auto;
+    max-width: min(92vw, 820px);
+    max-height: 70vh;            /* ensures it stays centered on all screens */
+    object-fit: contain;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.18);
+  }
+
+  /* Subtle floating hearts background (pure CSS) */
+  .hearts{
+    pointer-events:none;
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    opacity:.2;
+  }
+  .heart{
+    position:absolute;
+    width:10px; height:10px;
+    background: #d32f2f;
+    transform: rotate(45deg);
+    animation: float 10s linear infinite;
+  }
+  .heart:before, .heart:after{
+    content:"";
+    position:absolute;
+    width:10px; height:10px;
+    background:#d32f2f;
+    border-radius:50%;
+    top:-5px; left:0;
+  }
+  .heart:after{ left:-5px; top:0; }
+  @keyframes float{
+    from { transform: translateY(110vh) rotate(45deg); }
+    to   { transform: translateY(-20vh)  rotate(45deg); }
+  }
+  .footer-note{
+    margin-top:16px;
+    font-size:12px;
+    opacity:.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<!-- Your updated main block exactly as requested -->
+<main class="center" id="askView" aria-live="polite">
+  <div class="card">
+    <h1>Would you want to be my Shulai BB? 🦥❤️</h1>
+    <div class="buttons">
+      <button id="yesBtn" aria-label="Yes">Yes</button>
+      <button id="noBtn"  aria-label="No" >No</button>
+    </div>
+    <div class="footer-note">Prepared by you Shulai Boi 🦥❤️</div>
+  </div>
+</main>
+
+<!-- After YES: centered title above the centered photo -->
+<section class="photo-view" id="photoView" aria-hidden="true">
+  <div class="photo-card">
+    <h2 class="love-title">Love you bb</h2>
+    <!-- Put your photo file name below (e.g., photo.jpg) -->
+    <img class="photo-center" id="photoImg" src="photo.jpg" />
+  </div>
+</section>
+
+<script>
+  // Floating hearts generator
+  (function makeHearts(){
+    const c = document.getElementById('hearts');
+    const N = 20;
+    for(let i=0;i<N;i++){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      const size = 6 + Math.random()*10; // 6–16px
+      h.style.width = h.style.height = size + 'px';
+      h.style.left = Math.random()*100 + 'vw';
+      h.style.animationDuration = (8 + Math.random()*8) + 's';
+      h.style.animationDelay = (-10 + Math.random()*10) + 's';
+      h.style.opacity = (0.15 + Math.random()*0.25).toFixed(2);
+      c.appendChild(h);
+    }
+  })();
+
+  // Buttons logic
+  const yesBtn   = document.getElementById('yesBtn');
+  const noBtn    = document.getElementById('noBtn');
+  const askView  = document.getElementById('askView');
+  const photoView= document.getElementById('photoView');
+
+  let scale = 1;
+  const maxScale = 80; // big enough to exceed any screen
+
+  noBtn.addEventListener('click', () => {
+    // Increase YES button size each time NO is clicked
+    scale *= 1.6;           // exponential growth
+    if(scale > maxScale) scale = maxScale;
+    yesBtn.style.transform = `scale(${scale})`;
+    yesBtn.style.zIndex = 10;
+    yesBtn.style.transition = 'transform .18s ease';
+  });
+
+  yesBtn.addEventListener('click', () => {
+    // Switch to photo screen
+    askView.style.display = 'none';
+    photoView.style.display = 'flex';
+    photoView.setAttribute('aria-hidden','false');
+  });
+
+  // Optional: pressing Enter selects "Yes"
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') yesBtn.click();
+  });
+</script>
+</body>
+</html>
