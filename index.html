@@ -18,29 +18,52 @@
     color:var(--text);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", sans-serif;
   }
+
+  /* Place content ~25% from the top (with sensible min/max) */
   .center {
     min-height:100%;
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     justify-content:center;
     padding:24px;
+    padding-top: clamp(56px, 25vh, 220px); /* ≈25% from top */
   }
+
   .card{
     text-align:center;
     max-width:720px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
   }
+
+  /* Keep the question visible if the page scrolls */
+  .question-wrap{
+    position: sticky;
+    top: 12px;  /* when sticky, pin near top */
+    z-index: 1;
+    width: 100%;
+    padding-top: 4px;
+  }
+
   h1{
     font-size: clamp(22px, 5vw, 36px);
-    margin: 0 0 24px;
+    margin: 0;
     line-height:1.25;
     font-weight: 700;
   }
+
+  /* Buttons sit below the question; margin grows as YES grows */
   .buttons{
     display:flex;
     gap:16px;
     justify-content:center;
     flex-wrap:wrap;
+    margin-top:24px; /* increased by JS */
+    transition: margin-top .2s ease;
   }
+
   button{
     appearance:none;
     border:0;
@@ -57,9 +80,11 @@
   }
   button:hover{ background:var(--btn-hover); transform: translateY(-1px); }
   button:active{ transform: translateY(0); }
-  /* Special scaling behavior for the YES button */
+
+  /* YES button scales up */
   #yesBtn{
     transform-origin:center;
+    z-index: 1;
   }
 
   /* Photo view (appears after YES) */
@@ -67,31 +92,54 @@
     position:fixed;
     inset:0;
     display:none;                 /* becomes flex on YES */
-    align-items:center;
-    justify-content:center;
+    flex-direction: column;
+    align-items:center;           /* center horizontally */
+    justify-content:flex-start;   /* start from top */
     background:var(--bg);
     padding:24px;
+    overflow-y:auto;              /* ensure long letters can scroll */
   }
   .photo-card{
     text-align:center;
     max-width: min(92vw, 820px);
+    width: 100%;
     margin:auto;
   }
-  .love-title{
-    font-size: clamp(22px, 6vw, 42px);
-    font-weight: 800;
-    margin: 0 0 14px 0;
-    color: var(--text);
-  }
+
   .photo-center{
     display:block;
     width:auto;
     height:auto;
     max-width: min(92vw, 820px);
-    max-height: 70vh;            /* ensures it stays centered on all screens */
+    max-height: 58vh;            /* leave room for the letter below */
     object-fit: contain;
     border-radius: 14px;
     box-shadow: 0 12px 28px rgba(0,0,0,.18);
+    margin: 0 auto;
+  }
+
+  /* Letter block (below the photo) */
+  .love-letter{
+    text-align:left;
+    margin-top:16px;
+  }
+  .letter-to{
+    font-weight:800;
+    font-size: clamp(18px, 3.8vw, 24px);
+    margin: 4px 0 8px 0;
+  }
+  .letter-body{
+    font-size: clamp(14px, 2.1vw, 18px);  /* responsive so ~200字也易读 */
+    line-height: 1.8;
+    margin: 0 0 12px 0;
+    white-space: pre-line;                /* keep your manual line breaks */
+  }
+  .letter-signature{
+    text-align:right;
+    font-weight:700;
+    font-size: clamp(16px, 3vw, 20px);
+    margin-top: 8px;
+    padding-right: 4px;
   }
 
   /* Subtle floating hearts background (pure CSS) */
@@ -133,24 +181,32 @@
 
 <div class="hearts" id="hearts"></div>
 
-<!-- Your updated main block exactly as requested -->
 <main class="center" id="askView" aria-live="polite">
   <div class="card">
-    <h1>Would you want to be my Shulai BB? 🦥❤️</h1>
-    <div class="buttons">
-      <button id="yesBtn" aria-label="Yes">Yes</button>
-      <button id="noBtn"  aria-label="No" >No</button>
+    <!-- Question sits ~25% from the top initially -->
+    <div class="question-wrap" id="questionWrap">
+      <h1>Would you want to be my Shulai BB? 🦥❤️</h1>
     </div>
+
+    <div class="buttons" id="buttons">
+      <button id="yesBtn" aria-label="Yes">Yes 😘</button>
+      <button id="noBtn"  aria-label="No" >No 😢</button>
+    </div>
+
     <div class="footer-note">Prepared by you Shulai Boi 🦥❤️</div>
   </div>
 </main>
 
-<!-- After YES: centered title above the centered photo -->
+<!-- After YES: photo above, formatted letter below -->
 <section class="photo-view" id="photoView" aria-hidden="true">
   <div class="photo-card">
-    <h2 class="love-title">Love you bb</h2>
-    <!-- Put your photo file name below (e.g., photo.jpg) -->
-    <img class="photo-center" id="photoImg" src="photo.jpg" />
+    <img class="photo-center" id="photoImg" src="photo.jpg" alt="Our photo" />
+    <article class="love-letter" role="article" aria-label="Letter">
+      <div class="letter-to">My Shulai bb❤️:</div>
+      <p class="letter-body">
+情人節快樂！好開心今年可以同你過情人節正日😘 2026年過左個幾月，已經過得好唔容易，大家都忙左攰左，見面時間越黎越少。我好相信宜家我地嘅努力，會令我地嘅將來更加好。BB，今年仲有好多時間，我地嘅目標仲有時間去達成，我地一齊拖住手去面對唔同難關😘 你成日話，我之前好有型，講嘢唔多，行動最實際🦥 咁我就用行動去送個直男的浪漫比你啦❤️ 至於回家的誘惑，你好快就會知道啦。I LOVE YOU BB❤️❤️      </p>
+      <div class="letter-signature">Your Shulai Boi🦥❤️</div>
+    </article>
   </div>
 </section>
 
@@ -173,21 +229,30 @@
   })();
 
   // Buttons logic
-  const yesBtn   = document.getElementById('yesBtn');
-  const noBtn    = document.getElementById('noBtn');
-  const askView  = document.getElementById('askView');
-  const photoView= document.getElementById('photoView');
+  const yesBtn    = document.getElementById('yesBtn');
+  const noBtn     = document.getElementById('noBtn');
+  const askView   = document.getElementById('askView');
+  const photoView = document.getElementById('photoView');
+  const buttons   = document.getElementById('buttons');
 
   let scale = 1;
   const maxScale = 80; // big enough to exceed any screen
 
+  function adjustSpacing() {
+    // Push the buttons downward as "Yes" grows so it never overlaps the question
+    const extraTop = Math.min(260, (scale - 1) * 34); // cap the push
+    buttons.style.marginTop = (24 + extraTop) + 'px';
+  }
+
   noBtn.addEventListener('click', () => {
     // Increase YES button size each time NO is clicked
     scale *= 1.6;           // exponential growth
-    if(scale > maxScale) scale = maxScale;
+    if (scale > maxScale) scale = maxScale;
     yesBtn.style.transform = `scale(${scale})`;
     yesBtn.style.zIndex = 10;
     yesBtn.style.transition = 'transform .18s ease';
+
+    adjustSpacing(); // keep the question visible
   });
 
   yesBtn.addEventListener('click', () => {
@@ -195,12 +260,16 @@
     askView.style.display = 'none';
     photoView.style.display = 'flex';
     photoView.setAttribute('aria-hidden','false');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   // Optional: pressing Enter selects "Yes"
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter') yesBtn.click();
   });
+
+  // Initial spacing
+  window.addEventListener('load', adjustSpacing);
 </script>
 </body>
 </html>
